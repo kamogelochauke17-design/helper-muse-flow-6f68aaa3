@@ -56,7 +56,7 @@ export type Project = {
   status: "complete" | "draft" | "deleted";
   createdAt: string;
   updatedAt: string;
-  deletedAt?: string;
+  deletedAt?: string | undefined;
   references: Reference[];
   attachments: { name: string; excerpt: string }[];
   data: ProjectData;
