@@ -72,7 +72,7 @@ function NotesPage() {
   const absentees = attendees.filter((a) => !a.present);
 
   const summarise = async () => {
-    if (!notes.trim()) return toast.error("Paste your meeting notes first");
+    if (!notes.trim()) { toast.error("Paste your meeting notes first"); return; }
     setLoading(true);
     try {
       const res = await run({
@@ -259,7 +259,7 @@ function NotesPage() {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      if (absentees.length === 0) return toast.info("No absentees to email");
+                      if (absentees.length === 0) { toast.info("No absentees to email"); return; }
                       notify(
                         `Minutes emailed to absentees: ${absentees.map((a) => a.email || a.name).join(", ")}`,
                       );
@@ -271,7 +271,7 @@ function NotesPage() {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      if (result.actions.length === 0) return toast.info("No assignments found");
+                      if (result.actions.length === 0) { toast.info("No assignments found"); return; }
                       result.actions.forEach((a) =>
                         notify(
                           `Assignment reminder sent to ${a.owner || "team"}: "${a.task}" due ${a.deadline || "TBC"}`,

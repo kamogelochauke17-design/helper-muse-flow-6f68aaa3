@@ -121,7 +121,7 @@ function EmailPage() {
   });
 
   const generate = async () => {
-    if (!about.trim()) return toast.error("Describe what the email is about first");
+    if (!about.trim()) { toast.error("Describe what the email is about first"); return; }
     setLoading(true);
     try {
       const res = await gen({
