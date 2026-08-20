@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          read: boolean
+          text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          read?: boolean
+          text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          read?: boolean
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          notifications_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          notifications_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          notifications_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          attachments: Json
+          created_at: string
+          data: Json
+          deleted_at: string | null
+          id: string
+          kind: string
+          references_json: Json
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json
+          created_at?: string
+          data?: Json
+          deleted_at?: string | null
+          id?: string
+          kind: string
+          references_json?: Json
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json
+          created_at?: string
+          data?: Json
+          deleted_at?: string | null
+          id?: string
+          kind?: string
+          references_json?: Json
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
