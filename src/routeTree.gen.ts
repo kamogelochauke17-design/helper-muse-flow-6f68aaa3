@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as EmailRouteImport } from './routes/email'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as NotesRouteImport } from './routes/notes'
@@ -18,6 +19,11 @@ import { Route as TasksRouteImport } from './routes/tasks'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailRoute = EmailRouteImport.update({
@@ -43,6 +49,7 @@ const TasksRoute = TasksRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/email': typeof EmailRoute
   '/library': typeof LibraryRoute
   '/notes': typeof NotesRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/email': typeof EmailRoute
   '/library': typeof LibraryRoute
   '/notes': typeof NotesRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/email': typeof EmailRoute
   '/library': typeof LibraryRoute
   '/notes': typeof NotesRoute
@@ -65,14 +74,15 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/email' | '/library' | '/notes' | '/tasks'
+  fullPaths: '/' | '/auth' | '/email' | '/library' | '/notes' | '/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/email' | '/library' | '/notes' | '/tasks'
-  id: '__root__' | '/' | '/email' | '/library' | '/notes' | '/tasks'
+  to: '/' | '/auth' | '/email' | '/library' | '/notes' | '/tasks'
+  id: '__root__' | '/' | '/auth' | '/email' | '/library' | '/notes' | '/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   EmailRoute: typeof EmailRoute
   LibraryRoute: typeof LibraryRoute
   NotesRoute: typeof NotesRoute
@@ -86,6 +96,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email': {
@@ -121,6 +138,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   EmailRoute: EmailRoute,
   LibraryRoute: LibraryRoute,
   NotesRoute: NotesRoute,
