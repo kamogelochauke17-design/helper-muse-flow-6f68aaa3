@@ -80,6 +80,7 @@ const initialState: AppState = {
 
 let state: AppState = initialState;
 let loaded = false;
+let userId: string | null = null;
 const listeners = new Set<() => void>();
 
 function load(): AppState {
@@ -104,6 +105,37 @@ export function setState(updater: (prev: AppState) => AppState) {
   listeners.forEach((l) => l());
 }
 
+export function getUserId() {
+  return userId;
+}
+
+/** Called by the auth provider when the signed-in user changes. */
+export async function syncUser(id: string | null) {
+  if (id === userId) return;
+  userId = id;
+  if (!id) {
+    setState((s) => ({ ...initialState, theme: s.theme }));
+    return;
+  }
+  const { cloudFetchAll, cloudSaveProject } = await import("@/lib/cloud");
+  const remote = await cloudFetchAll(id);
+  // Push any local guest work up to the cloud once, then adopt the cloud copy.
+  const localOnly = state.projects.filter((p) => !remote.projects.some((r) => r.id === p.id));
+  for (const p of localOnly) {
+    try {
+      await cloudSaveProject(id, p);
+    } catch {
+      /* ignore */
+    }
+  }
+  setState((s) => ({
+    ...s,
+    projects: [...localOnly, ...remote.projects],
+    notifications: remote.notifications,
+    notificationsEnabled: remote.notificationsEnabled,
+  }));
+}
+
 export function useAppState() {
   const [, force] = useState(0);
   const [ready, setReady] = useState(loaded);
@@ -125,20 +157,34 @@ export function useAppState() {
   return { state: ready ? state : initialState, ready, update };
 }
 
-export const uid = () => Math.random().toString(36).slice(2, 10);
+export const uid = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 export function notify(text: string) {
-  setState((s) =>
-    s.notificationsEnabled
-      ? {
-          ...s,
-          notifications: [
-            { id: uid(), text, at: new Date().toISOString(), read: false },
-            ...s.notifications,
-          ].slice(0, 50),
-        }
-      : s,
-  );
+  if (!state.notificationsEnabled) return;
+  const entry = { id: uid(), text, at: new Date().toISOString(), read: false };
+  setState((s) => ({ ...s, notifications: [entry, ...s.notifications].slice(0, 50) }));
+  if (userId) {
+    void import("@/lib/cloud").then((m) => m.cloudAddNotification(userId!, entry)).catch(() => {});
+  }
+}
+
+export function setNotificationsEnabled(enabled: boolean) {
+  setState((s) => ({ ...s, notificationsEnabled: enabled }));
+  if (userId) {
+    void import("@/lib/cloud")
+      .then((m) => m.cloudSetNotificationsEnabled(userId!, enabled))
+      .catch(() => {});
+  }
+}
+
+function pushProject(id: string) {
+  if (!userId) return;
+  const p = state.projects.find((x) => x.id === id);
+  if (!p) return;
+  void import("@/lib/cloud").then((m) => m.cloudSaveProject(userId!, p)).catch(() => {});
 }
 
 export function saveProject(p: Project) {
@@ -151,6 +197,7 @@ export function saveProject(p: Project) {
         : [p, ...s.projects],
     };
   });
+  pushProject(p.id);
 }
 
 export function deleteProject(id: string) {
@@ -162,6 +209,7 @@ export function deleteProject(id: string) {
         : p,
     ),
   }));
+  pushProject(id);
   notify("Item moved to Bin. It will be permanently deleted in 30 days.");
 }
 
@@ -172,10 +220,14 @@ export function restoreProject(id: string) {
       p.id === id ? { ...p, status: "draft" as const, deletedAt: undefined } : p,
     ),
   }));
+  pushProject(id);
 }
 
 export function purgeProject(id: string) {
   setState((s) => ({ ...s, projects: s.projects.filter((p) => p.id !== id) }));
+  if (userId) {
+    void import("@/lib/cloud").then((m) => m.cloudDeleteProject(id)).catch(() => {});
+  }
 }
 
 export function daysLeftInBin(p: Project) {
