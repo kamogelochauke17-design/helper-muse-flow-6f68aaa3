@@ -126,9 +126,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     On
                     <Switch
                       checked={state.notificationsEnabled}
-                      onCheckedChange={(v) =>
-                        setState((s) => ({ ...s, notificationsEnabled: v }))
-                      }
+                      onCheckedChange={(v) => setNotificationsEnabled(v)}
                     />
                   </span>
                 </DropdownMenuLabel>
