@@ -40,6 +40,7 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { state } = useAppState();
+  const { user, signOut } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
