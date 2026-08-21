@@ -3,6 +3,7 @@ import {
   Bell,
   Files,
   ListTodo,
+  LogOut,
   Mail,
   Moon,
   NotebookPen,
@@ -10,6 +11,7 @@ import {
   Search,
   Sun,
   Trash2,
+  UserRound,
   LayoutDashboard,
 } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
@@ -25,7 +27,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { useAppState, setState } from "@/lib/store";
+import { useAuth } from "@/hooks/useAuth";
+import { useAppState, setState, setNotificationsEnabled } from "@/lib/store";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
