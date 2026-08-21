@@ -3,6 +3,7 @@ import {
   Bell,
   Files,
   ListTodo,
+  LogOut,
   Mail,
   Moon,
   NotebookPen,
@@ -10,6 +11,7 @@ import {
   Search,
   Sun,
   Trash2,
+  UserRound,
   LayoutDashboard,
 } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
@@ -25,7 +27,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { useAppState, setState } from "@/lib/store";
+import { useAuth } from "@/hooks/useAuth";
+import { useAppState, setState, setNotificationsEnabled } from "@/lib/store";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -37,6 +40,7 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { state } = useAppState();
+  const { user, signOut } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
@@ -123,9 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     On
                     <Switch
                       checked={state.notificationsEnabled}
-                      onCheckedChange={(v) =>
-                        setState((s) => ({ ...s, notificationsEnabled: v }))
-                      }
+                      onCheckedChange={(v) => setNotificationsEnabled(v)}
                     />
                   </span>
                 </DropdownMenuLabel>
@@ -158,6 +160,32 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Moon className="size-4" />
               )}
             </Button>
+
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    aria-label="Account"
+                  >
+                    <UserRound className="size-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="truncate text-xs font-normal text-muted-foreground">
+                    {user.email}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => void signOut()}>
+                    <LogOut className="mr-2 size-4" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild size="sm" variant="outline">
+                <Link to="/auth">Sign in</Link>
+              </Button>
+            )}
 
             <Button asChild size="sm" className="gap-1.5">
               <Link to="/email">
